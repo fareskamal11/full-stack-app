@@ -1,0 +1,32 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: docker build . -t my-backend:latest
+
+      - name: Run Backend Container
+        run: |
+          docker run -d -p 5000:5000 --name backend my-backend:latest
+          sleep 10  # Give it time to start up
+
+      - name: Check Backend Health
+        run: |
+          curl --fail http://localhost:5000/api/health || (echo "Backend not responding" && exit 1)
+
+      - name: Stop Docker Container
+        if: always()
+        run: docker stop backend && docker rm backend
+
+
