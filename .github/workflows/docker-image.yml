@@ -1,18 +1,46 @@
-name: Docker Image CI
+name: Docker Compose CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
-
-  build:
-
+  build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      docker:
+        image: docker:latest
+        options: --privileged
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set up Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Build and Start Services
+        run: |
+          docker-compose up -d --build
+
+      - name: Wait for services to be ready
+        run: sleep 10
+
+      - name: Check Backend Health (Optional)
+        run: |
+          curl --fail http://localhost:5000 || (echo "Backend not responding" && exit 1)
+
+      - name: Check Frontend Health (Optional)
+        run: |
+          curl --fail http://localhost:3000 || (echo "Frontend not responding" && exit 1)
+
+      - name: Stop and Clean Up
+        run: docker-compose down
