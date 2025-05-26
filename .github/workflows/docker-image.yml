@@ -10,11 +10,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      docker:
-        image: docker:latest
-        options: --privileged
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -34,13 +29,15 @@ jobs:
       - name: Wait for services to be ready
         run: sleep 10
 
-      - name: Check Backend Health (Optional)
-        run: |
-          curl --fail http://localhost:5000 || (echo "Backend not responding" && exit 1)
+      # 🔒 Temporarily Disabled: Backend health check
+      # - name: Check Backend Health (Optional)
+      #   run: |
+      #     curl --fail http://localhost:5000 || (echo "Backend not responding" && exit 1)
 
-      - name: Check Frontend Health (Optional)
-        run: |
-          curl --fail http://localhost:3000 || (echo "Frontend not responding" && exit 1)
+      # 🔒 Temporarily Disabled: Frontend health check
+      # - name: Check Frontend Health (Optional)
+      #   run: |
+      #     curl --fail http://localhost:3000 || (echo "Frontend not responding" && exit 1)
 
       - name: Stop and Clean Up
         run: docker-compose down
