@@ -1,25 +1,31 @@
-name: My First Workflow
+name: Build and Test with Gradle
 
 on:
   push:
-    branches:
-      - main  # Or "master" if your branch is named that
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
         with:
-          node-version: '18'
+          distribution: 'temurin'  # Or adopt, zulu, etc.
+          java-version: '17'       # Or '11' depending on your project
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
 
-      - name: Run Tests
-        run: npm test
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
